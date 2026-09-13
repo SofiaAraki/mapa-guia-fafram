@@ -15,6 +15,38 @@ const destinationMarker = document.getElementById("destinationMarker");
 const mapNodes = document.getElementById("mapNodes");
 const baseWalkways = document.getElementById("baseWalkways");
 const SVG_NS = "http://www.w3.org/2000/svg";
+let trajetoriaFrame = null;
+
+function pararAnimacaoTrajetoria(){
+  if (trajetoriaFrame !== null) cancelAnimationFrame(trajetoriaFrame);
+  trajetoriaFrame = null;
+  routePath.classList.remove("route-animating");
+}
+
+function animarTrajetoria(){
+  pararAnimacaoTrajetoria();
+  routePath.classList.add("route-animating");
+
+  const comprimento = routePath.getTotalLength();
+  if (!comprimento) return;
+
+  const inicio = performance.now();
+  const duracao = Math.min(5200, Math.max(1800, comprimento * 1.4));
+
+  function atualizar(agora){
+    const progresso = Math.min(1, (agora - inicio) / duracao);
+    const pontoAtual = routePath.getPointAtLength(comprimento * progresso);
+    player.setAttribute("cx", pontoAtual.x);
+    player.setAttribute("cy", pontoAtual.y);
+    if (progresso < 1) {
+      trajetoriaFrame = requestAnimationFrame(atualizar);
+    } else {
+      trajetoriaFrame = null;
+    }
+  }
+
+  trajetoriaFrame = requestAnimationFrame(atualizar);
+}
 
 function preencherSelects(){
   const grupos = Object.entries(categorias);
@@ -121,6 +153,7 @@ function mostrarRota(){
   // Destaca a rota sobre os corredores do esboço.
   routePath.setAttribute("d", caminhoParaSvg(coords));
   routePath.setAttribute("opacity", "1");
+  animarTrajetoria();
 
   const A = pontoAmbiente(origem);
   const B = pontoAmbiente(destino);
@@ -159,6 +192,7 @@ function limpar(){
   instructions.innerHTML = "<b>Orientação:</b> escolha sua localização e o destino.";
   routePath.setAttribute("opacity","0");
   routePath.setAttribute("d","");
+  pararAnimacaoTrajetoria();
   player.setAttribute("opacity","0");
   destinationMarker.setAttribute("opacity","0");
   resultCard.classList.add("hidden");

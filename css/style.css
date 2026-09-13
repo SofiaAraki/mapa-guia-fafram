@@ -179,6 +179,15 @@ button:hover{filter:brightness(.97)}
   filter:drop-shadow(0 1px 1px #8a4a00);
 }
 
+.route-animating{
+  stroke-dasharray:42 22;
+  animation: route-flow .72s linear infinite;
+}
+
+@keyframes route-flow{
+  to{stroke-dashoffset:-64}
+}
+
 .player{
   fill:#2457d6;
   stroke:#fff;
@@ -245,6 +254,10 @@ body.high-contrast p{color:#222}
 body.large-text{font-size:18px}
 body.large-text .room-label{font-size:16px}
 body.large-text .room-label.small{font-size:13px}
+
+@media(prefers-reduced-motion: reduce){
+  .route-animating{animation:none}
+}
 
 @media(max-width:700px){
   .topbar{padding:20px 16px}

@@ -8,10 +8,10 @@
 
 const locais = {
   // Entrada e serviços
-  entrada: { nome: "Entrada", x: 790, y: 650, tipo: "origem", acesso: "entradaJ" },
-  portaria: { nome: "Portaria", x: 700, y: 660, acesso: "portariaJ" },
-  atendimento: { nome: "Atendimento", x: 880, y: 660, acesso: "atendimentoJ" },
-  fonte: { nome: "Fonte", x: 790, y: 770, acesso: "fonteJ" },
+  entrada: { nome: "Entrada", x: 760, y: 638, tipo: "origem", acesso: "entradaJ" },
+  portaria: { nome: "Portaria", x: 540, y: 638, acesso: "portariaJ" },
+  atendimento: { nome: "Atendimento", x: 970, y: 638, acesso: "atendimentoJ" },
+  fonte: { nome: "Fonte", x: 760, y: 770, acesso: "fonteJ" },
 
   // Laboratórios e bloco esquerdo
   labEngenharia: { nome: "Laboratório de Engenharia", x: 158, y: 90, acesso: "labEngenhariaJ" },
