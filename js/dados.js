@@ -236,15 +236,64 @@ const ligaLocal = {
   sala45: "corredorInferior"
 };
 
-/* Caminhos base para qualquer renderização SVG alternativa ao mapa de referência. */
-const caminhos = [
-  "M760 638 L760 610 L760 535 L650 445 L555 360 L455 275 L330 220",
-  "M650 445 L520 565 L430 470 L330 330 L240 230",
-  "M760 535 L860 430 L970 430 L1080 430 L1190 430 L1290 430 L1400 430",
-  "M860 430 L900 350 L1010 320 L1120 320 L1280 280 L1460 300 L1460 500",
-  "M1290 430 L1330 540 L1400 580",
-  "M760 535 L760 300 L850 220 L980 200 L1120 200 L1260 200 L1380 200 L1490 200 L1460 300"
-];
+/*
+ * O arquivo campus1.svg foi exportado com este espaço de desenho e com um
+ * transform no grupo raiz. Os dados antigos estavam em 1560 x 815, portanto
+ * a conversão é feita uma única vez aqui, antes de áreas e rotas serem usadas.
+ */
+const CAMPUS_SVG = {
+  width: 4026.1,
+  height: 2129.24,
+  translateX: 464.1203720545971,
+  translateY: -599.2665509736016,
+  oldWidth: 1560,
+  oldHeight: 815
+};
+
+function paraCoordenadaSvg([x, y]) {
+  return [
+    x * CAMPUS_SVG.width / CAMPUS_SVG.oldWidth,
+    y * CAMPUS_SVG.height / CAMPUS_SVG.oldHeight
+  ];
+}
+
+Object.values(locais).forEach(local => {
+  [local.x, local.y] = paraCoordenadaSvg([local.x, local.y]);
+});
+Object.keys(pontos).forEach(id => {
+  pontos[id] = paraCoordenadaSvg(pontos[id]);
+});
+
+/*
+ * Segmentos navegáveis dos corredores. Cada segmento conecta dois nós
+ * adjacentes; assim a rota passa exatamente por cada mudança de direção,
+ * bifurcação e acesso, em vez de interpolar uma linha única pelo campus.
+ */
+const segmentosCorredor = conexoes
+  .filter(([a, b]) => pontos[a] && pontos[b])
+  .map(([a, b], indice) => ({
+    id: `corredor-${String(indice + 1).padStart(2, "0")}`,
+    de: a,
+    para: b,
+    pontos: [pontos[a], pontos[b]],
+    tipo: "corredor"
+  }));
+
+const segmentosAcesso = Object.entries(ligaLocal).map(([local, no]) => ({
+  id: `acesso-${local}`,
+  de: local,
+  para: no,
+  pontos: [pontoLocalTemporario(locais[local]), pontos[no]],
+  tipo: "acesso"
+}));
+
+function pontoLocalTemporario(local) {
+  return [local.x, local.y];
+}
+
+const caminhos = segmentosCorredor.map(segmento =>
+  `M ${segmento.pontos[0][0]} ${segmento.pontos[0][1]} L ${segmento.pontos[1][0]} ${segmento.pontos[1][1]}`
+);
 
 const categorias = {
   "Entrada e serviços": ["entrada", "portaria", "atendimento", "fonte"],
@@ -292,12 +341,15 @@ const areas = Object.entries(locais).map(([id, local]) => ({
 ]);
 
 const CAMPUS_MAP = {
-  viewBox: { x: 0, y: 0, width: 1560, height: 815 },
-  imagemReferencia: "mapa fafram campos1.png",
+  viewBox: { x: 0, y: 0, width: CAMPUS_SVG.width, height: CAMPUS_SVG.height },
+  imagemReferencia: "campus1.svg",
+  transformacao: CAMPUS_SVG,
   locais,
   pontos,
   conexoes,
   ligaLocal,
+  segmentosCorredor,
+  segmentosAcesso,
   caminhos,
   areas,
   categorias

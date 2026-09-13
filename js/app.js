@@ -13,6 +13,8 @@ const routePath = document.getElementById("routePath");
 const player = document.getElementById("player");
 const destinationMarker = document.getElementById("destinationMarker");
 const mapNodes = document.getElementById("mapNodes");
+const baseWalkways = document.getElementById("baseWalkways");
+const SVG_NS = "http://www.w3.org/2000/svg";
 
 function preencherSelects(){
   const grupos = Object.entries(categorias);
@@ -48,6 +50,19 @@ function desenharNos(){
     c.dataset.id = id;
     c.setAttribute("aria-label", local.nome);
     mapNodes.appendChild(c);
+  });
+}
+
+function desenharSegmentos(){
+  segmentosCorredor.forEach(segmento => {
+    const path = document.createElementNS(SVG_NS, "path");
+    path.setAttribute(
+      "d",
+      `M ${segmento.pontos[0][0]} ${segmento.pontos[0][1]} L ${segmento.pontos[1][0]} ${segmento.pontos[1][1]}`
+    );
+    path.setAttribute("class", "walk segment-walk");
+    path.dataset.segmento = segmento.id;
+    baseWalkways.appendChild(path);
   });
 }
 
@@ -163,6 +178,7 @@ function alternarAcessibilidade(){
 }
 
 preencherSelects();
+desenharSegmentos();
 desenharNos();
 
 routeBtn.addEventListener("click", mostrarRota);

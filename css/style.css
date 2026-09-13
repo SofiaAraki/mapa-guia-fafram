@@ -156,16 +156,23 @@ button:hover{filter:brightness(.97)}
 .walk{
   fill:none;
   stroke:#c8d8cc;
-  stroke-width:18;
+  stroke-width:52;
   stroke-linecap:round;
   stroke-linejoin:round;
+}
+
+.segment-walk{
+  stroke:#1071e5;
+  stroke-width:76;
+  opacity:.12;
+  pointer-events:none;
 }
 
 /* rota */
 .route{
   fill:none;
   stroke:#ff8a00;
-  stroke-width:9;
+  stroke-width:34;
   stroke-linecap:round;
   stroke-linejoin:round;
   stroke-dasharray:14 10;
@@ -175,19 +182,19 @@ button:hover{filter:brightness(.97)}
 .player{
   fill:#2457d6;
   stroke:#fff;
-  stroke-width:5;
+  stroke-width:12;
 }
 
 .marker{
   fill:#e5484d;
   stroke:#fff;
-  stroke-width:4;
+  stroke-width:10;
 }
 
 .map-node{
   fill:#fff;
   stroke:#98a2b3;
-  stroke-width:2.5;
+  stroke-width:8;
 }
 
 .map-node.destination-node{
