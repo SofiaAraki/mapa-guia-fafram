@@ -88,5 +88,7 @@ function rotaMaisCurta(origem, destino){
 }
 
 function pontosDaRota(caminho){
-  return caminho.map(id => ponto(id)).filter(Boolean);
+  return caminho.map(id => ponto(id)).filter(Boolean).filter((point, index, points) =>
+    index === 0 || point[0] !== points[index - 1][0] || point[1] !== points[index - 1][1]
+  );
 }

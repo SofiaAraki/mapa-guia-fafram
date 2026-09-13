@@ -3,7 +3,7 @@
  *
  * Fonte única dos dados usados pela interface e pelo cálculo de rotas.
  * As coordenadas dos ambientes e dos eixos navegáveis usam o espaço nativo
- * do campus1.svg (4026.1 x 2129.24). O centro do ambiente é separado do
+ * do campus1.svg (4033.94 x 1976.96). O centro do ambiente é separado do
  * ponto de acesso ao corredor para que nenhuma rota atravesse uma sala.
  */
 
@@ -244,7 +244,7 @@ const ligaLocal = {
  */
 const CAMPUS_SVG = {
   width: 4033.94,
-  height: 2055.96,
+  height: 1976.96,
   translateX: 471.2080546732275,
   translateY: -588.0394574039277,
   oldWidth: 1560,
@@ -327,7 +327,7 @@ Object.entries(CENTROS_AMBIENTES_SVG).forEach(([id, centro]) => {
 });
 
 /* Eixos centrais das 20 faixas azuis extraídos do campus1.svg. */
-const segmentosAzuis = [
+let segmentosAzuis = [
   [[860.65,1273.55],[1334.27,801.67]],
   [[3362.50,1647.91],[3890.77,1649.14]],
   [[1674.22,1226.04],[2061.18,1614.75]],
@@ -478,7 +478,7 @@ construirGrafoAzul();
  * adjacentes; assim a rota passa exatamente por cada mudança de direção,
  * bifurcação e acesso, em vez de interpolar uma linha única pelo campus.
  */
-const segmentosCorredor = conexoes
+let segmentosCorredor = conexoes
   .filter(([a, b]) => pontos[a] && pontos[b])
   .map(([a, b], indice) => ({
     id: `corredor-${String(indice + 1).padStart(2, "0")}`,
@@ -488,7 +488,7 @@ const segmentosCorredor = conexoes
     tipo: "corredor"
   }));
 
-const segmentosAcesso = Object.entries(ligaLocal).map(([local, no]) => ({
+let segmentosAcesso = Object.entries(ligaLocal).map(([local, no]) => ({
   id: `acesso-${local}`,
   de: local,
   para: no,
@@ -500,7 +500,7 @@ function pontoLocalTemporario(local) {
   return [local.x, local.y];
 }
 
-const caminhos = segmentosCorredor.map(segmento =>
+let caminhos = segmentosCorredor.map(segmento =>
   `M ${segmento.pontos[0][0]} ${segmento.pontos[0][1]} L ${segmento.pontos[1][0]} ${segmento.pontos[1][1]}`
 );
 
@@ -560,6 +560,74 @@ function sincronizarCentrosSvg(svgDocument) {
     local.rota = acesso;
     pontos[`acesso-${id}`] = acesso;
   });
+  return true;
+}
+
+/* Extrai os corredores da planta carregada. Cada corredor azul é um retângulo
+ * rotacionado; amostramos seu contorno, calculamos o eixo principal e usamos
+ * as extremidades desse eixo como segmento navegável. Assim uma nova versão
+ * do SVG não depende de coordenadas copiadas de uma versão anterior. */
+function extrairSegmentosAzuis(svgDocument) {
+  return [...svgDocument.querySelectorAll('path')]
+    .filter(path => (path.getAttribute('fill') || '').toLowerCase() === '#1071e5')
+    .map(path => {
+      const matrix = path.getCTM();
+      const length = path.getTotalLength();
+      const pontosAmostrados = [];
+      for (let i = 0; i <= 64; i++) {
+        const p = path.getPointAtLength(length * i / 64);
+        pontosAmostrados.push([
+          matrix.a * p.x + matrix.c * p.y + matrix.e,
+          matrix.b * p.x + matrix.d * p.y + matrix.f
+        ]);
+      }
+
+      const media = pontosAmostrados.reduce((s, p) => [s[0] + p[0], s[1] + p[1]], [0, 0])
+        .map(v => v / pontosAmostrados.length);
+      let xx = 0, yy = 0, xy = 0;
+      pontosAmostrados.forEach(([x, y]) => {
+        xx += (x - media[0]) ** 2;
+        yy += (y - media[1]) ** 2;
+        xy += (x - media[0]) * (y - media[1]);
+      });
+      const angulo = 0.5 * Math.atan2(2 * xy, xx - yy);
+      const eixo = [Math.cos(angulo), Math.sin(angulo)];
+      const projetados = pontosAmostrados.map(p => p[0] * eixo[0] + p[1] * eixo[1]);
+      const minimo = Math.min(...projetados);
+      const maximo = Math.max(...projetados);
+      const margem = Math.max(8, (maximo - minimo) * 0.04);
+      const inicio = pontosAmostrados.filter((_, i) => projetados[i] <= minimo + margem);
+      const fim = pontosAmostrados.filter((_, i) => projetados[i] >= maximo - margem);
+      const mediaPontos = grupo => grupo.reduce((s, p) => [s[0] + p[0], s[1] + p[1]], [0, 0]).map(v => v / grupo.length);
+      return [mediaPontos(inicio), mediaPontos(fim)];
+    });
+}
+
+function atualizarGeometriaSvg(svgDocument) {
+  const novosSegmentos = extrairSegmentosAzuis(svgDocument);
+  if (novosSegmentos.length !== 20) return false;
+  segmentosAzuis = novosSegmentos;
+  sincronizarCentrosSvg(svgDocument);
+  construirGrafoAzul();
+  segmentosCorredor = conexoes
+    .filter(([a, b]) => pontos[a] && pontos[b])
+    .map((segmento, indice) => ({
+      id: `corredor-${String(indice + 1).padStart(2, "0")}`,
+      de: segmento[0],
+      para: segmento[1],
+      pontos: [pontos[segmento[0]], pontos[segmento[1]]],
+      tipo: "corredor"
+    }));
+  segmentosAcesso = Object.entries(ligaLocal).map(([local, no]) => ({
+    id: `acesso-${local}`,
+    de: local,
+    para: no,
+    pontos: [[locais[local].x, locais[local].y], pontos[no]],
+    tipo: "acesso"
+  }));
+  caminhos = segmentosCorredor.map(segmento =>
+    `M ${segmento.pontos[0][0]} ${segmento.pontos[0][1]} L ${segmento.pontos[1][0]} ${segmento.pontos[1][1]}`
+  );
   return true;
 }
 

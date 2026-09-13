@@ -217,7 +217,9 @@ desenharSegmentos();
 desenharNos();
 
 campusGeometry?.addEventListener("load", () => {
-  if (!sincronizarCentrosSvg(campusGeometry.contentDocument)) return;
+  if (!atualizarGeometriaSvg(campusGeometry.contentDocument)) return;
+  baseWalkways.replaceChildren();
+  desenharSegmentos();
   mapNodes.replaceChildren();
   desenharNos();
 });
