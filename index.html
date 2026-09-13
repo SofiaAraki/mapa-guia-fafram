@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Campus Guia</title>
+  <title>Campus Guia — FAFRAM Campos 1</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -11,8 +11,8 @@
 <header class="topbar">
   <div>
     <small>PROJETO DE RESPONSABILIDADE SOCIAL</small>
-    <h1>Campus Guia</h1>
-    <p>Encontre seu destino de forma simples e interativa.</p>
+    <h1>Campus Guia FAFRAM</h1>
+    <p>Encontre seu destino no mapa do Campus 1 de forma simples e interativa.</p>
   </div>
 
   <button id="accessibilityBtn"
@@ -45,30 +45,38 @@
     <div class="mapHead">
       <div>
         <span id="status">Aguardando destino</span>
-        <h2>🗺️ Mapa do campus</h2>
+        <h2>🗺️ Mapa do Campus 1</h2>
       </div>
       <button id="resetBtn" type="button">Limpar</button>
     </div>
 
     <div class="mapWrap">
       <svg id="campusMap"
-           viewBox="0 0 1450 850"
-           aria-label="Mapa esquemático interativo do campus"
+           viewBox="0 0 1560 815"
+           aria-label="Mapa oficial interativo do Campus 1 da FAFRAM"
            role="img">
+        <title>Mapa FAFRAM Campos 1</title>
+        <desc>Planta do campus com os ambientes identificados e a rota destacada entre a origem e o destino escolhidos.</desc>
 
-        <rect id="campusBackground"
-              class="campus-area"
-              x="20" y="20"
-              width="1410" height="810"
-              rx="24"/>
+        <image id="campusReferenceMap"
+               href="campus1.svg"
+               x="0"
+               y="0"
+               width="1560"
+               height="815"
+               preserveAspectRatio="none"
+               aria-hidden="true" />
 
-        <g id="mapAreas"></g>
-        <g id="baseWalkways"></g>
+        <g id="mapAreas" aria-hidden="true"></g>
+        <g id="baseWalkways" aria-hidden="true"></g>
         <g id="mapNodes"></g>
 
-        <path id="routePath" class="route" opacity="0"/>
-        <circle id="player" class="player" r="14" opacity="0"/>
-        <circle id="destinationMarker" class="marker" r="12" opacity="0"/>
+        <path id="routePath"
+              class="route"
+              opacity="0"
+              aria-label="Rota calculada" />
+        <circle id="player" class="player" r="14" opacity="0" aria-label="Origem" />
+        <circle id="destinationMarker" class="marker" r="12" opacity="0" aria-label="Destino" />
       </svg>
     </div>
 
@@ -88,7 +96,7 @@
   </section>
 </main>
 
-<footer>Campus Guia — protótipo acadêmico</footer>
+<footer>Campus Guia FAFRAM — Campus 1</footer>
 
 <script src="js/dados.js"></script>
 <script src="js/rotas.js"></script>
