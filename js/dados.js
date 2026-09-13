@@ -372,6 +372,10 @@ function projecaoEmSegmento(point, a, b) {
   return { t, ponto: [a[0] + t * dx, a[1] + t * dy], distancia: distanciaPonto(point, [a[0] + t * dx, a[1] + t * dy]) };
 }
 
+function distanciaAosCorredores(point) {
+  return Math.min(...segmentosAzuis.map(([a, b]) => projecaoEmSegmento(point, a, b).distancia));
+}
+
 function chavePonto(point) {
   return `${point[0].toFixed(2)}:${point[1].toFixed(2)}`;
 }
@@ -417,7 +421,8 @@ function construirGrafoAzul() {
     idsExtremidades.slice(i + 1).forEach(b => {
       const distancia = distanciaPonto(pontosNos[a], pontosNos[b]);
       const jaLigados = arestas.some(([de, para]) => (de === a && para === b) || (de === b && para === a));
-      if (distancia <= 270 && !jaLigados) arestas.push([a, b]);
+      const meio = [(pontosNos[a][0] + pontosNos[b][0]) / 2, (pontosNos[a][1] + pontosNos[b][1]) / 2];
+      if (distancia <= 270 && distanciaAosCorredores(meio) <= 110 && !jaLigados) arestas.push([a, b]);
     });
   });
 
@@ -441,18 +446,12 @@ function construirGrafoAzul() {
   arestas.forEach(([de, para]) => conexoes.push([de, para]));
 
   Object.keys(ligaLocal).forEach(id => delete ligaLocal[id]);
-  const corredorPreferido = {
-    sala11: 18, biblioteca: 19, banheiros: 19, sala25: 19,
-    sala40: 17, sala41: 17, sala42: 17, sala43: 17, sala44: 17,
-    sala49: 1, sala48: 1, sala47: 1, sala46: 1, sala45: 1,
-    rampa2: 15, escada2: 1
-  };
   Object.entries(locais).forEach(([id, local]) => {
-    const indices = corredorPreferido[id] === undefined
-      ? segmentosAzuis.map((_, indice) => indice)
-      : [corredorPreferido[id]];
-    const candidato = indices
-      .map(indice => ({ indice, ...projecaoEmSegmento([local.x, local.y], segmentosAzuis[indice][0], segmentosAzuis[indice][1]) }))
+    /* O próprio centro geométrico da área determina o acesso. Um corredor
+     * pode receber qualquer quantidade de salas; não existe mais uma tabela
+     * manual sala -> corredor. */
+    const candidato = segmentosAzuis
+      .map((segmento, indice) => ({ indice, ...projecaoEmSegmento([local.x, local.y], segmento[0], segmento[1]) }))
       .sort((a, b) => a.distancia - b.distancia)[0];
     const alvo = segmentosAzuis[candidato.indice];
     const acesso = candidato.ponto;
@@ -465,9 +464,10 @@ function construirGrafoAzul() {
     pontos[acessoId] = acesso;
     ligaLocal[id] = acessoId;
     const candidatosNoCorredor = Object.entries(pontos)
-      .filter(([nodeId, point]) => nodeId !== acessoId && projecaoEmSegmento(point, alvo[0], alvo[1]).distancia < 1)
-      .sort(([, a], [, b]) => distanciaPonto(acesso, a) - distanciaPonto(acesso, b));
-    if (candidatosNoCorredor[0]) conexoes.push([acessoId, candidatosNoCorredor[0][0]]);
+      .filter(([nodeId, point]) => nodeId !== acessoId)
+      .map(([nodeId, point]) => ({ nodeId, point, distancia: projecaoEmSegmento(point, alvo[0], alvo[1]).distancia }))
+      .sort((a, b) => a.distancia - b.distancia || distanciaPonto(acesso, a.point) - distanciaPonto(acesso, b.point));
+    if (candidatosNoCorredor[0]) conexoes.push([acessoId, candidatosNoCorredor[0].nodeId]);
   });
 }
 
@@ -503,6 +503,65 @@ function pontoLocalTemporario(local) {
 const caminhos = segmentosCorredor.map(segmento =>
   `M ${segmento.pontos[0][0]} ${segmento.pontos[0][1]} L ${segmento.pontos[1][0]} ${segmento.pontos[1][1]}`
 );
+
+/*
+ * Recalibra os centros a partir do SVG oficial. Os valores acima são apenas
+ * uma semente de migração para associar os nomes semânticos às formas; depois
+ * que o <object> termina de carregar, a posição usada pela aplicação vem do
+ * centro da área branca correspondente, calculado com getBBox/getCTM.
+ */
+function sincronizarCentrosSvg(svgDocument) {
+  if (!svgDocument) return false;
+  const areas = [...svgDocument.querySelectorAll('path')]
+    .filter(path => (path.getAttribute('fill') || '').toLowerCase() === '#fff')
+    .map(path => {
+      const box = path.getBBox();
+      if (box.width > 900 || box.height > 900) return null;
+      const matrix = path.getCTM();
+      if (!matrix) return null;
+      const corners = [[box.x, box.y], [box.x + box.width, box.y + box.height]];
+      const transformed = corners.map(([x, y]) => [
+        matrix.a * x + matrix.c * y + matrix.e,
+        matrix.b * x + matrix.d * y + matrix.f
+      ]);
+      return {
+        centro: [
+          (transformed[0][0] + transformed[1][0]) / 2,
+          (transformed[0][1] + transformed[1][1]) / 2
+        ],
+        area: box.width * box.height
+      };
+    })
+    .filter(Boolean);
+
+  if (!areas.length) return false;
+
+  const usados = new Set();
+  Object.entries(locais)
+    .sort(([, a], [, b]) => (a.x * a.x + a.y * a.y) - (b.x * b.x + b.y * b.y))
+    .forEach(([id, local]) => {
+      const candidato = areas
+        .map((area, index) => ({ area, index, distancia: distanciaPonto([local.x, local.y], area.centro) }))
+        .filter(item => !usados.has(item.index))
+        .sort((a, b) => a.distancia - b.distancia)[0];
+      if (!candidato) return;
+      usados.add(candidato.index);
+      [local.x, local.y] = candidato.area.centro;
+    });
+
+  /* Recalcula todos os acessos sem reconstruir o grafo: os nós de corredor
+   * continuam os mesmos, mas cada sala passa a apontar para a projeção do seu
+   * centro geométrico no corredor azul mais próximo. */
+  Object.entries(locais).forEach(([id, local]) => {
+    const candidato = segmentosAzuis
+      .map((segmento, indice) => ({ indice, ...projecaoEmSegmento([local.x, local.y], segmento[0], segmento[1]) }))
+      .sort((a, b) => a.distancia - b.distancia)[0];
+    const acesso = candidato.ponto;
+    local.rota = acesso;
+    pontos[`acesso-${id}`] = acesso;
+  });
+  return true;
+}
 
 const categorias = {
   "Entrada e serviços": ["entrada", "portaria", "atendimento", "fonte"],
