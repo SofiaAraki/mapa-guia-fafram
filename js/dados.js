@@ -46,7 +46,7 @@ const locais = {
   sala11: { nome: "Sala 11", x: 879, y: 165, acesso: "sala11J" },
   biblioteca: { nome: "Biblioteca", x: 1066, y: 165, acesso: "bibliotecaJ" },
   banheiros: { nome: "Banheiros", x: 1247, y: 165, acesso: "banheirosJ" },
-  sala25: { nome: "Sala 25", x: 1430, y: 165, acesso: "sala25J" },
+  sala25: { nome: "Sala 25", x: 1433, y: 165, acesso: "sala25J" },
 
   // Salas 12 a 24 e acessos do bloco direito
   sala18: { nome: "Sala 18", x: 1062, y: 269, acesso: "sala18J" },
@@ -243,10 +243,10 @@ const ligaLocal = {
  * a conversão é feita uma única vez aqui, antes de áreas e rotas serem usadas.
  */
 const CAMPUS_SVG = {
-  width: 4026.1,
-  height: 2129.24,
-  translateX: 464.1203720545971,
-  translateY: -599.2665509736016,
+  width: 4033.94,
+  height: 2055.96,
+  translateX: 471.2080546732275,
+  translateY: -588.0394574039277,
   oldWidth: 1560,
   oldHeight: 815
 };
@@ -282,10 +282,10 @@ const CENTROS_AMBIENTES_SVG = {
   lab2: [835.7, 1114.4],
   lab1: [1015.9, 1291.2],
   lab4: [661.3, 1291.2],
-  sala11: [2324.7, 457.0],
-  biblioteca: [2810.5, 457.0],
-  banheiros: [3296.4, 457.0],
-  sala25: [3782.2, 457.0],
+  sala11: [2147.4, 468.2],
+  biblioteca: [2461.3, 468.2],
+  banheiros: [2747.4, 468.2],
+  sala25: [2996.7, 468.2],
   sala40: [3959.9, 809.3],
   sala41: [3959.9, 1003.6],
   sala42: [3959.9, 1197.8],
@@ -328,26 +328,27 @@ Object.entries(CENTROS_AMBIENTES_SVG).forEach(([id, centro]) => {
 
 /* Eixos centrais das 20 faixas azuis extraídos do campus1.svg. */
 const segmentosAzuis = [
-  [[1416.64, 629.17], [4025.11, 630.53]],
-  [[3302.16, 1636.68], [3883.72, 1637.92]],
-  [[1667.13, 1214.82], [2037.42, 1586.86]],
-  [[1995.16, 884.90], [2634.42, 1526.00]],
-  [[1332.77, 1493.06], [2207.72, 619.99]],
-  [[1991.40, 1602.14], [2695.47, 899.89]],
-  [[825.99, 911.68], [1399.77, 1487.25]],
-  [[1267.95, 790.17], [1619.48, 1143.41]],
-  [[853.56, 1262.32], [1327.19, 790.44]],
-  [[2625.25, 1585.94], [3249.70, 963.32]],
-  [[465.31, 1320.73], [1264.39, 523.50]],
-  [[1299.75, 1862.66], [1775.42, 1388.78]],
-  [[837.02, 33.17], [1787.46, 985.52]],
-  [[537.66, 676.69], [958.67, 257.46]],
-  [[409.42, 878.27], [1315.34, 1786.06]],
-  [[2630.39, 898.10], [3205.27, 1474.80]],
-  [[3195.79, 1407.80], [3541.78, 1063.53]],
-  [[3180.70, 1083.39], [3540.62, 1445.03]],
-  [[3836.86, 1683.48], [3838.16, 698.16]],
-  [[3175.19, 1017.77], [3176.39, 675.90]]
+  [[860.65,1273.55],[1334.27,801.67]],
+  [[3362.50,1647.91],[3890.77,1649.14]],
+  [[1674.22,1226.04],[2061.18,1614.75]],
+  [[2006.69,900.58],[2634.84,1530.56]],
+  [[1409.56,1433.93],[2191.94,653.39]],
+  [[2062.60,1549.26],[2636.56,977.11]],
+  [[605.25,695.04],[1406.83,1498.49]],
+  [[1337.78,864.13],[1626.58,1154.65]],
+  [[472.39,1331.96],[1271.48,534.73]],
+  [[1322.33,1858.39],[1782.50,1400.00]],
+  [[538.10,694.58],[983.26,251.18]],
+  [[416.51,889.50],[1320.23,1795.09]],
+  [[2637.47,909.33],[3141.38,1415.02]],
+  [[3207.88,1414.02],[3548.86,1074.76]],
+  [[3194.29,1101.12],[3547.71,1456.26]],
+  [[3182.27,1072.48],[3183.48,687.13]],
+  [[2632.34,1597.18],[3194.28,1037.04]],
+  [[3843.97,1602.95],[3845.24,821.04]],
+  [[1456.83,640.43],[2191.94,641.00]],
+  [[2191.94,641.00],[3229.03,641.78]],
+  [[986.72,187.03],[1789.06,991.24]]
 ];
 
 function distanciaPonto(A, B) {
@@ -420,32 +421,53 @@ function construirGrafoAzul() {
     });
   });
 
+  /* Junção específica do encontro diagonal–horizontal do térreo. As bordas
+   * dos dois polígonos azuis se sobrepõem visualmente, mas os eixos exportados
+   * ficam separados por poucos pixels. */
+  const nosProximos = Object.values(nos);
+  for (let i = 0; i < nosProximos.length; i++) {
+    for (let j = i + 1; j < nosProximos.length; j++) {
+      const a = nosProximos[i];
+      const b = nosProximos[j];
+      if (distanciaPonto(a.ponto, b.ponto) > 25) continue;
+      const jaLigados = arestas.some(([de, para]) => (de === a.id && para === b.id) || (de === b.id && para === a.id));
+      if (!jaLigados) arestas.push([a.id, b.id]);
+    }
+  }
+
   Object.keys(pontos).forEach(id => delete pontos[id]);
   Object.values(nos).forEach(no => { pontos[no.id] = no.ponto; });
   conexoes.length = 0;
   arestas.forEach(([de, para]) => conexoes.push([de, para]));
 
   Object.keys(ligaLocal).forEach(id => delete ligaLocal[id]);
+  const corredorPreferido = {
+    sala11: 18, biblioteca: 19, banheiros: 19, sala25: 19,
+    sala40: 17, sala41: 17, sala42: 17, sala43: 17, sala44: 17,
+    sala49: 1, sala48: 1, sala47: 1, sala46: 1, sala45: 1,
+    rampa2: 15, escada2: 1
+  };
   Object.entries(locais).forEach(([id, local]) => {
-    const candidato = segmentosAzuis
-      .map((segmento, indice) => ({ indice, ...projecaoEmSegmento([local.x, local.y], segmento[0], segmento[1]) }))
+    const indices = corredorPreferido[id] === undefined
+      ? segmentosAzuis.map((_, indice) => indice)
+      : [corredorPreferido[id]];
+    const candidato = indices
+      .map(indice => ({ indice, ...projecaoEmSegmento([local.x, local.y], segmentosAzuis[indice][0], segmentosAzuis[indice][1]) }))
       .sort((a, b) => a.distancia - b.distancia)[0];
     const alvo = segmentosAzuis[candidato.indice];
     const acesso = candidato.ponto;
     local.rota = acesso;
 
-    let noMaisProximo = null;
-    let menorDistancia = Infinity;
-    Object.entries(pontos).forEach(([nodeId, point]) => {
-      const distancia = distanciaPonto(acesso, point);
-      const noNoSegmento = projecaoEmSegmento(point, alvo[0], alvo[1]).distancia < 1;
-      if (noNoSegmento && distancia < menorDistancia) {
-        menorDistancia = distancia;
-        noMaisProximo = nodeId;
-      }
-    });
-    ligaLocal[id] = noMaisProximo || obterNo(acesso);
-    if (!pontos[ligaLocal[id]]) pontos[ligaLocal[id]] = acesso;
+    /* Cada ambiente ganha um nó exatamente na sua projeção sobre o corredor.
+     * Assim Sala 25, por exemplo, conecta-se ao meio do corredor horizontal,
+     * e não à extremidade que poderia levar ao corredor vertical do 2º andar. */
+    const acessoId = `acesso-${id}`;
+    pontos[acessoId] = acesso;
+    ligaLocal[id] = acessoId;
+    const candidatosNoCorredor = Object.entries(pontos)
+      .filter(([nodeId, point]) => nodeId !== acessoId && projecaoEmSegmento(point, alvo[0], alvo[1]).distancia < 1)
+      .sort(([, a], [, b]) => distanciaPonto(acesso, a) - distanciaPonto(acesso, b));
+    if (candidatosNoCorredor[0]) conexoes.push([acessoId, candidatosNoCorredor[0][0]]);
   });
 }
 
