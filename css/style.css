@@ -1,0 +1,248 @@
+*{box-sizing:border-box}
+
+:root{
+  --blue:#2457d6;
+  --text:#18212f;
+  --muted:#667085;
+  --border:#d8dee9;
+  --map:#eef6ef;
+}
+
+html{scroll-behavior:smooth}
+
+body{
+  margin:0;
+  background:#f5f7fa;
+  color:var(--text);
+  font-family:Arial,sans-serif;
+}
+
+.topbar{
+  background:#fff;
+  border-bottom:1px solid var(--border);
+  padding:24px max(20px,calc((100% - 1100px)/2));
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+}
+
+.topbar h1{margin:5px 0;font-size:30px}
+.topbar small{color:var(--blue);font-weight:bold}
+.topbar p,p{color:var(--muted)}
+
+.accessibility-btn{
+  width:46px;height:46px;
+  border:1px solid var(--border);
+  background:#fff;
+  font-size:22px;
+}
+
+main{
+  width:min(1100px,calc(100% - 32px));
+  margin:22px auto;
+  display:grid;
+  gap:18px;
+}
+
+.card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:22px;
+  box-shadow:0 8px 25px #00000008;
+}
+
+.card h2{margin:0 0 8px}
+
+.row{display:grid;grid-template-columns:1fr;gap:10px;margin:15px 0}
+
+input,select{
+  width:100%;
+  padding:13px;
+  border:1px solid #cbd3df;
+  border-radius:10px;
+  font-size:15px;
+  background:#fff;
+  color:var(--text);
+}
+
+button{
+  border:0;
+  border-radius:10px;
+  padding:12px 16px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+button:hover{filter:brightness(.97)}
+.primary{width:100%;background:var(--blue);color:#fff}
+
+.mapHead{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px;
+}
+
+.mapHead span{
+  font-size:12px;
+  background:#eef2f7;
+  padding:5px 9px;
+  border-radius:20px;
+}
+
+.mapWrap{
+  overflow:auto;
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:var(--map);
+  padding:10px;
+}
+
+.mapWrap svg{
+  width:100%;
+  min-width:900px;
+  display:block;
+  background:#eef6ef;
+}
+
+/* Fundo do campus */
+.campus-area{
+  fill:#edf7ef;
+  stroke:#b7d2bb;
+  stroke-width:3;
+}
+
+/* Áreas e salas: sempre claras, evitando o fundo preto */
+.area rect,
+.area ellipse{
+  fill:#fff;
+  stroke:#8795a8;
+  stroke-width:2;
+}
+
+.room-label{
+  fill:#18212f;
+  font-size:14px;
+  font-weight:bold;
+  text-anchor:middle;
+  dominant-baseline:middle;
+}
+
+.room-label.small{font-size:11px}
+.room-label.tiny{font-size:10px}
+
+.green-area polygon{
+  fill:#e3f0e5;
+  stroke:#b8cdbb;
+  stroke-width:2;
+}
+.green-area text{
+  fill:#55705b;
+  font-size:10px;
+  text-anchor:middle;
+  dominant-baseline:middle;
+}
+
+.areaLabel{
+  fill:#475467;
+  font-size:13px;
+  font-weight:bold;
+  text-anchor:middle;
+}
+
+/* caminhos base */
+.walk{
+  fill:none;
+  stroke:#c8d8cc;
+  stroke-width:18;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+/* rota */
+.route{
+  fill:none;
+  stroke:#ff8a00;
+  stroke-width:9;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  stroke-dasharray:14 10;
+  filter:drop-shadow(0 1px 1px #8a4a00);
+}
+
+.player{
+  fill:#2457d6;
+  stroke:#fff;
+  stroke-width:5;
+}
+
+.marker{
+  fill:#e5484d;
+  stroke:#fff;
+  stroke-width:4;
+}
+
+.map-node{
+  fill:#fff;
+  stroke:#98a2b3;
+  stroke-width:2.5;
+}
+
+.map-node.destination-node{
+  fill:#fff7e8;
+  stroke:#ff8a00;
+}
+
+.instructions{
+  margin-top:12px;
+  padding:12px;
+  background:#f8fafc;
+  border-radius:10px;
+}
+
+.result{
+  display:flex;
+  gap:18px;
+  align-items:center;
+}
+
+.result>#character{
+  font-size:58px;
+  background:#edf2ff;
+  border-radius:18px;
+  padding:15px;
+}
+
+.success{color:#18794e;font-weight:bold}
+
+.routeStep{
+  padding:9px;
+  margin-top:6px;
+  border-left:3px solid var(--blue);
+  background:#f8fafc;
+}
+
+.hidden{display:none}
+
+footer{text-align:center;color:var(--muted);padding:20px}
+
+body.high-contrast{
+  background:#fff;
+  color:#000;
+}
+body.high-contrast .card,
+body.high-contrast .topbar{background:#fff;color:#000;border-color:#000}
+body.high-contrast p{color:#222}
+body.large-text{font-size:18px}
+body.large-text .room-label{font-size:16px}
+body.large-text .room-label.small{font-size:13px}
+
+@media(max-width:700px){
+  .topbar{padding:20px 16px}
+  .topbar h1{font-size:25px}
+  .mapHead{align-items:flex-start;gap:10px;flex-direction:column}
+  main{width:min(100% - 20px,1100px)}
+  .card{padding:16px}
+}

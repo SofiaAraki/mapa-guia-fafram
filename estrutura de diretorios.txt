@@ -1,0 +1,25 @@
+campus-guia/
+│
+├── index.html
+│
+├── css/
+│   └── style.css
+│
+├── js/
+│   ├── app.js
+│   ├── mapa.js
+│   ├── rotas.js
+│   ├── personagem.js
+│   └── acessibilidade.js
+│
+├── mapa/
+│   └── campus.svg
+│
+├── personagens/
+│   ├── personagem1.png
+│   ├── personagem2.png
+│   └── robo.png
+│
+└── dados/
+    ├── locais.json
+    └── caminhos.json
