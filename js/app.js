@@ -122,8 +122,8 @@ function mostrarRota(){
   routePath.setAttribute("d", caminhoParaSvg(coords));
   routePath.setAttribute("opacity", "1");
 
-  const A = ponto(origem);
-  const B = ponto(destino);
+  const A = pontoAmbiente(origem);
+  const B = pontoAmbiente(destino);
 
   player.setAttribute("cx", A[0]);
   player.setAttribute("cy", A[1]);

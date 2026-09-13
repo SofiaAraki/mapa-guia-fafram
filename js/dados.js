@@ -8,10 +8,10 @@
 
 const locais = {
   // Entrada e serviços
-  entrada: { nome: "Entrada", x: 760, y: 638, tipo: "origem", acesso: "entradaJ" },
-  portaria: { nome: "Portaria", x: 540, y: 638, acesso: "portariaJ" },
-  atendimento: { nome: "Atendimento", x: 970, y: 638, acesso: "atendimentoJ" },
-  fonte: { nome: "Fonte", x: 760, y: 770, acesso: "fonteJ" },
+  entrada: { nome: "Entrada", x: 790, y: 650, tipo: "origem", acesso: "entradaJ" },
+  portaria: { nome: "Portaria", x: 700, y: 660, acesso: "portariaJ" },
+  atendimento: { nome: "Atendimento", x: 880, y: 660, acesso: "atendimentoJ" },
+  fonte: { nome: "Fonte", x: 790, y: 770, acesso: "fonteJ" },
 
   // Laboratórios e bloco esquerdo
   labEngenharia: { nome: "Laboratório de Engenharia", x: 158, y: 90, acesso: "labEngenhariaJ" },
@@ -263,6 +263,131 @@ Object.values(locais).forEach(local => {
 Object.keys(pontos).forEach(id => {
   pontos[id] = paraCoordenadaSvg(pontos[id]);
 });
+
+/* Eixos centrais das 20 faixas azuis extraídos do campus1.svg. */
+const segmentosAzuis = [
+  [[1416.64, 629.17], [4025.11, 630.53]],
+  [[3302.16, 1636.68], [3883.72, 1637.92]],
+  [[1667.13, 1214.82], [2037.42, 1586.86]],
+  [[1995.16, 884.90], [2634.42, 1526.00]],
+  [[1332.77, 1493.06], [2207.72, 619.99]],
+  [[1991.40, 1602.14], [2695.47, 899.89]],
+  [[825.99, 911.68], [1399.77, 1487.25]],
+  [[1267.95, 790.17], [1619.48, 1143.41]],
+  [[853.56, 1262.32], [1327.19, 790.44]],
+  [[2625.25, 1585.94], [3249.70, 963.32]],
+  [[465.31, 1320.73], [1264.39, 523.50]],
+  [[1299.75, 1862.66], [1775.42, 1388.78]],
+  [[837.02, 33.17], [1787.46, 985.52]],
+  [[537.66, 676.69], [958.67, 257.46]],
+  [[409.42, 878.27], [1315.34, 1786.06]],
+  [[2630.39, 898.10], [3205.27, 1474.80]],
+  [[3195.79, 1407.80], [3541.78, 1063.53]],
+  [[3180.70, 1083.39], [3540.62, 1445.03]],
+  [[3836.86, 1683.48], [3838.16, 698.16]],
+  [[3175.19, 1017.77], [3176.39, 675.90]]
+];
+
+function distanciaPonto(A, B) {
+  return Math.hypot(A[0] - B[0], A[1] - B[1]);
+}
+
+function intersecaoSegmentos(a, b, c, d) {
+  const den = (a[0] - b[0]) * (c[1] - d[1]) - (a[1] - b[1]) * (c[0] - d[0]);
+  if (Math.abs(den) < 0.0001) return null;
+  const t = ((a[0] - c[0]) * (c[1] - d[1]) - (a[1] - c[1]) * (c[0] - d[0])) / den;
+  const u = -((a[0] - b[0]) * (a[1] - c[1]) - (a[1] - b[1]) * (a[0] - c[0])) / den;
+  if (t < -0.0001 || t > 1.0001 || u < -0.0001 || u > 1.0001) return null;
+  return [a[0] + t * (b[0] - a[0]), a[1] + t * (b[1] - a[1])];
+}
+
+function projecaoEmSegmento(point, a, b) {
+  const dx = b[0] - a[0];
+  const dy = b[1] - a[1];
+  const divisor = dx * dx + dy * dy;
+  const t = Math.max(0, Math.min(1, ((point[0] - a[0]) * dx + (point[1] - a[1]) * dy) / divisor));
+  return { t, ponto: [a[0] + t * dx, a[1] + t * dy], distancia: distanciaPonto(point, [a[0] + t * dx, a[1] + t * dy]) };
+}
+
+function chavePonto(point) {
+  return `${point[0].toFixed(2)}:${point[1].toFixed(2)}`;
+}
+
+function construirGrafoAzul() {
+  const divisores = segmentosAzuis.map(() => [0, 1]);
+  segmentosAzuis.forEach((segmento, i) => {
+    segmentosAzuis.forEach((outro, j) => {
+      if (j <= i) return;
+      const cruzamento = intersecaoSegmentos(segmento[0], segmento[1], outro[0], outro[1]);
+      if (!cruzamento) return;
+      divisores[i].push(projecaoEmSegmento(cruzamento, segmento[0], segmento[1]).t);
+      divisores[j].push(projecaoEmSegmento(cruzamento, outro[0], outro[1]).t);
+    });
+  });
+
+  const nos = {};
+  const arestas = [];
+  const obterNo = point => {
+    const key = chavePonto(point);
+    if (!nos[key]) nos[key] = { id: `c${Object.keys(nos).length + 1}`, ponto: point };
+    return nos[key].id;
+  };
+
+  segmentosAzuis.forEach((segmento, i) => {
+    const ts = [...new Set(divisores[i].map(t => +t.toFixed(6)))].sort((a, b) => a - b);
+    for (let j = 0; j < ts.length - 1; j++) {
+      const a = [segmento[0][0] + ts[j] * (segmento[1][0] - segmento[0][0]), segmento[0][1] + ts[j] * (segmento[1][1] - segmento[0][1])];
+      const b = [segmento[0][0] + ts[j + 1] * (segmento[1][0] - segmento[0][0]), segmento[0][1] + ts[j + 1] * (segmento[1][1] - segmento[0][1])];
+      const de = obterNo(a);
+      const para = obterNo(b);
+      if (de !== para) arestas.push([de, para]);
+    }
+  });
+
+  /* O SVG tem junções que encostam pela largura da faixa, mas não se cruzam
+   * matematicamente. Unimos somente extremidades próximas, nunca pontos
+   * internos, para preservar o percurso físico dos corredores azuis. */
+  const extremidades = [...new Set(segmentosAzuis.flatMap(segmento => [chavePonto(segmento[0]), chavePonto(segmento[1])]))];
+  const idsExtremidades = extremidades.map(key => nos[key]?.id).filter(Boolean);
+  const pontosNos = Object.fromEntries(Object.values(nos).map(no => [no.id, no.ponto]));
+  idsExtremidades.forEach((a, i) => {
+    idsExtremidades.slice(i + 1).forEach(b => {
+      const distancia = distanciaPonto(pontosNos[a], pontosNos[b]);
+      const jaLigados = arestas.some(([de, para]) => (de === a && para === b) || (de === b && para === a));
+      if (distancia <= 270 && !jaLigados) arestas.push([a, b]);
+    });
+  });
+
+  Object.keys(pontos).forEach(id => delete pontos[id]);
+  Object.values(nos).forEach(no => { pontos[no.id] = no.ponto; });
+  conexoes.length = 0;
+  arestas.forEach(([de, para]) => conexoes.push([de, para]));
+
+  Object.keys(ligaLocal).forEach(id => delete ligaLocal[id]);
+  Object.entries(locais).forEach(([id, local]) => {
+    const candidato = segmentosAzuis
+      .map((segmento, indice) => ({ indice, ...projecaoEmSegmento([local.x, local.y], segmento[0], segmento[1]) }))
+      .sort((a, b) => a.distancia - b.distancia)[0];
+    const alvo = segmentosAzuis[candidato.indice];
+    const acesso = candidato.ponto;
+    local.rota = acesso;
+
+    let noMaisProximo = null;
+    let menorDistancia = Infinity;
+    Object.entries(pontos).forEach(([nodeId, point]) => {
+      const distancia = distanciaPonto(acesso, point);
+      const noNoSegmento = projecaoEmSegmento(point, alvo[0], alvo[1]).distancia < 1;
+      if (noNoSegmento && distancia < menorDistancia) {
+        menorDistancia = distancia;
+        noMaisProximo = nodeId;
+      }
+    });
+    ligaLocal[id] = noMaisProximo || obterNo(acesso);
+    if (!pontos[ligaLocal[id]]) pontos[ligaLocal[id]] = acesso;
+  });
+}
+
+construirGrafoAzul();
 
 /*
  * Segmentos navegáveis dos corredores. Cada segmento conecta dois nós

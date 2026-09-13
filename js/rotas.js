@@ -1,7 +1,12 @@
 function ponto(id){
-  if (locais[id]) return [locais[id].x, locais[id].y];
+  if (locais[id]) return locais[id].rota || [locais[id].x, locais[id].y];
   if (pontos[id]) return pontos[id];
   return null;
+}
+
+function pontoAmbiente(id){
+  if (!locais[id]) return ponto(id);
+  return [locais[id].x, locais[id].y];
 }
 
 function grafoCompleto(){
