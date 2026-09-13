@@ -2,8 +2,9 @@
  * Campus Guia — mapa FAFRAM Campos 1
  *
  * Fonte única dos dados usados pela interface e pelo cálculo de rotas.
- * As coordenadas usam o mesmo espaço da imagem "mapa fafram campos1.png",
- * redimensionada no index.html para o viewBox 1560 x 815.
+ * As coordenadas dos ambientes e dos eixos navegáveis usam o espaço nativo
+ * do campus1.svg (4026.1 x 2129.24). O centro do ambiente é separado do
+ * ponto de acesso ao corredor para que nenhuma rota atravesse uma sala.
  */
 
 const locais = {
@@ -45,7 +46,7 @@ const locais = {
   sala11: { nome: "Sala 11", x: 879, y: 165, acesso: "sala11J" },
   biblioteca: { nome: "Biblioteca", x: 1066, y: 165, acesso: "bibliotecaJ" },
   banheiros: { nome: "Banheiros", x: 1247, y: 165, acesso: "banheirosJ" },
-  sala25: { nome: "Sala 25", x: 1433, y: 165, acesso: "sala25J" },
+  sala25: { nome: "Sala 25", x: 1430, y: 165, acesso: "sala25J" },
 
   // Salas 12 a 24 e acessos do bloco direito
   sala18: { nome: "Sala 18", x: 1062, y: 269, acesso: "sala18J" },
@@ -262,6 +263,67 @@ Object.values(locais).forEach(local => {
 });
 Object.keys(pontos).forEach(id => {
   pontos[id] = paraCoordenadaSvg(pontos[id]);
+});
+
+/*
+ * Centros dos ambientes no campus1.svg. O mapa novo não é uma simples versão
+ * redimensionada do desenho anterior: ele tem outra origem, outra rotação e
+ * salas adicionais. Por isso estes pontos são mantidos no espaço nativo do
+ * SVG, separados dos nós usados para navegar.
+ */
+const CENTROS_AMBIENTES_SVG = {
+  entrada: [2041.4, 1708.5],
+  portaria: [1809.0, 1714.0],
+  atendimento: [2273.9, 1714.1],
+  fonte: [2041.4, 1996.6],
+  labEngenharia: [779.0, 213.6],
+  cantina: [1035.9, 465.5],
+  lab3: [680.5, 955.4],
+  lab2: [835.7, 1114.4],
+  lab1: [1015.9, 1291.2],
+  lab4: [661.3, 1291.2],
+  sala11: [2324.7, 457.0],
+  biblioteca: [2810.5, 457.0],
+  banheiros: [3296.4, 457.0],
+  sala25: [3782.2, 457.0],
+  sala40: [3959.9, 809.3],
+  sala41: [3959.9, 1003.6],
+  sala42: [3959.9, 1197.8],
+  sala43: [3959.9, 1392.1],
+  sala44: [3959.9, 1586.3],
+  sala49: [3441.6, 1756.9],
+  sala48: [3571.2, 1758.3],
+  sala47: [3700.9, 1758.3],
+  sala46: [3830.6, 1758.3],
+  sala45: [3960.3, 1758.3],
+  patioEsquerdo: [1035.9, 465.5],
+  patioCentral: [1926.7, 1282.8],
+  banheirosEsquerda: [542.3, 816.9],
+  salaProfessores: [1521.1, 881.2],
+  cozinha: [2667.5, 1246.6],
+  salaoNobre: [2385.2, 1426.8],
+  diretoria: [1619.8, 1375.3],
+  secretaria: [1486.5, 1507.5],
+  sala18: [2496.1, 920.3],
+  sala20: [2339.5, 1074.7],
+  sala19: [2413.5, 1001.9],
+  sala17: [2778.1, 895.4],
+  sala16: [2930.2, 1043.9],
+  sala12: [2522.2, 1564.8],
+  sala13: [2385.2, 1426.8],
+  sala15: [2775.1, 1601.1],
+  sala14: [2907.6, 1479.5],
+  sala21: [3357.3, 1107.4],
+  sala22: [3354.6, 1399.5],
+  sala23: [3434.0, 1032.1],
+  sala24: [3428.7, 1474.2],
+  banheirosDireita: [3576.2, 1250.4],
+  rampa2: [3190.0, 790.0],
+  escada2: [2775.1, 1601.1]
+};
+
+Object.entries(CENTROS_AMBIENTES_SVG).forEach(([id, centro]) => {
+  if (locais[id]) [locais[id].x, locais[id].y] = centro;
 });
 
 /* Eixos centrais das 20 faixas azuis extraídos do campus1.svg. */
