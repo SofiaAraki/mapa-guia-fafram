@@ -14,7 +14,6 @@ const player = document.getElementById("player");
 const destinationMarker = document.getElementById("destinationMarker");
 const mapNodes = document.getElementById("mapNodes");
 const baseWalkways = document.getElementById("baseWalkways");
-const campusGeometry = document.getElementById("campusGeometry");
 const SVG_NS = "http://www.w3.org/2000/svg";
 let trajetoriaFrame = null;
 
@@ -215,14 +214,6 @@ function alternarAcessibilidade(){
 preencherSelects();
 desenharSegmentos();
 desenharNos();
-
-campusGeometry?.addEventListener("load", () => {
-  if (!atualizarGeometriaSvg(campusGeometry.contentDocument)) return;
-  baseWalkways.replaceChildren();
-  desenharSegmentos();
-  mapNodes.replaceChildren();
-  desenharNos();
-});
 
 routeBtn.addEventListener("click", mostrarRota);
 resetBtn.addEventListener("click", limpar);

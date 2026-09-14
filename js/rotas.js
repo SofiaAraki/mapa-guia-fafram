@@ -1,94 +1,80 @@
-function ponto(id){
-  if (locais[id]) return locais[id].rota || [locais[id].x, locais[id].y];
-  if (pontos[id]) return pontos[id];
-  return null;
-}
+/* Cálculo de rotas — não conhece HTML nem SVG. */
 
-function pontoAmbiente(id){
-  if (!locais[id]) return ponto(id);
-  return [locais[id].x, locais[id].y];
-}
+function grafoCompleto() {
+  const grafo = {};
 
-function grafoCompleto(){
-  const g = {};
+  Object.keys(pontos).forEach(id => { grafo[id] = []; });
+  Object.keys(locais).forEach(id => { grafo[id] ||= []; });
 
-  Object.keys(pontos).forEach(id => g[id] = []);
-  Object.keys(locais).forEach(id => g[id] = g[id] || []);
-
-  conexoes.forEach(([a,b]) => {
-    g[a].push(b);
-    g[b].push(a);
+  conexoes.forEach(([a, b]) => {
+    if (!grafo[a]) grafo[a] = [];
+    if (!grafo[b]) grafo[b] = [];
+    grafo[a].push(b);
+    grafo[b].push(a);
   });
 
-  Object.entries(ligaLocal).forEach(([local, junction]) => {
-    if (!g[local]) g[local] = [];
-    if (!g[junction]) g[junction] = [];
-    g[local].push(junction);
-    g[junction].push(local);
+  Object.entries(ligaLocal).forEach(([local, acesso]) => {
+    grafo[local] ||= [];
+    grafo[acesso] ||= [];
+    grafo[local].push(acesso);
+    grafo[acesso].push(local);
   });
 
-  return g;
+  return grafo;
 }
 
-function distancia(a,b){
-  const A = ponto(a), B = ponto(b);
-  if (!A || !B) return Infinity;
-  return Math.hypot(A[0]-B[0], A[1]-B[1]);
-}
+function rotaMaisCurta(origem, destino) {
+  const grafo = grafoCompleto();
+  if (!grafo[origem] || !grafo[destino]) return null;
 
-function rotaMaisCurta(origem, destino){
-  const g = grafoCompleto();
-
-  if (!g[origem] || !g[destino]) return null;
-
-  // Dijkstra simples: o mapa usa distâncias geométricas.
-  const dist = {};
-  const anterior = {};
+  const distancias = Object.fromEntries(Object.keys(grafo).map(id => [id, Infinity]));
+  const anteriores = {};
   const visitados = new Set();
-  Object.keys(g).forEach(id => dist[id] = Infinity);
-  dist[origem] = 0;
+  distancias[origem] = 0;
 
-  while (visitados.size < Object.keys(g).length){
+  while (visitados.size < Object.keys(grafo).length) {
     let atual = null;
     let menor = Infinity;
 
-    for (const id of Object.keys(g)){
-      if (!visitados.has(id) && dist[id] < menor){
-        menor = dist[id];
+    Object.keys(grafo).forEach(id => {
+      if (!visitados.has(id) && distancias[id] < menor) {
+        menor = distancias[id];
         atual = id;
       }
-    }
+    });
 
     if (!atual) break;
     if (atual === destino) break;
-
     visitados.add(atual);
 
-    for (const vizinho of g[atual]){
-      const nova = dist[atual] + distancia(atual, vizinho);
-      if (nova < dist[vizinho]){
-        dist[vizinho] = nova;
-        anterior[vizinho] = atual;
+    grafo[atual].forEach(vizinho => {
+      const novaDistancia = distancias[atual] + distancia(atual, vizinho);
+      if (novaDistancia < distancias[vizinho]) {
+        distancias[vizinho] = novaDistancia;
+        anteriores[vizinho] = atual;
       }
-    }
+    });
   }
 
-  if (dist[destino] === Infinity) return null;
+  if (distancias[destino] === Infinity) return null;
 
   const caminho = [];
   let atual = destino;
 
-  while (atual !== undefined){
+  while (atual !== undefined) {
     caminho.unshift(atual);
     if (atual === origem) break;
-    atual = anterior[atual];
+    atual = anteriores[atual];
   }
 
-  return caminho;
+  return caminho[0] === origem ? caminho : null;
 }
 
-function pontosDaRota(caminho){
-  return caminho.map(id => ponto(id)).filter(Boolean).filter((point, index, points) =>
-    index === 0 || point[0] !== points[index - 1][0] || point[1] !== points[index - 1][1]
-  );
+function pontosDaRota(caminho) {
+  return caminho
+    .map(ponto)
+    .filter(Boolean)
+    .filter((point, index, points) =>
+      index === 0 || point[0] !== points[index - 1][0] || point[1] !== points[index - 1][1]
+    );
 }

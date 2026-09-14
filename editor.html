@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Campus Guia — Editor do mapa</title>
+  <link rel="stylesheet" href="css/style.css?v=editor2">
+  <link rel="stylesheet" href="css/editor.css?v=editor2">
+</head>
+<body class="editor-page">
+<header class="topbar">
+  <div>
+    <small>CONFIGURAÇÃO DO PROJETO</small>
+    <h1>Editor do Campus Guia</h1>
+    <p>Edite locais, pontos de passagem e conexões diretamente sobre a planta.</p>
+  </div>
+  <a class="back-link" href="index.html">← Voltar ao Campus Guia</a>
+</header>
+
+<main class="editor-layout">
+  <aside class="card editor-panel">
+    <h2>🛠️ Editor</h2>
+
+    <div class="mode-switch" role="toolbar" aria-label="Modo de edição">
+      <button class="mode-btn active" data-mode="local" type="button">📍 Local</button>
+      <button class="mode-btn" data-mode="ponto" type="button">● Ponto</button>
+      <button class="mode-btn" data-mode="conexao" type="button">↔ Conexão</button>
+    </div>
+
+    <section id="localTools" class="tool-section">
+      <p class="help">Selecione um local e clique no mapa ou arraste o marcador para reposicioná-lo.</p>
+
+      <label for="localSelect">Local</label>
+      <select id="localSelect">
+        <option value="">Selecione um local</option>
+      </select>
+
+      <div class="editor-actions">
+        <button id="addLocalBtn" class="primary" type="button">+ Novo local</button>
+      </div>
+
+      <hr>
+
+      <h3>Dados do local</h3>
+      <label for="nameInput">Nome</label>
+      <input id="nameInput" type="text" placeholder="Nome do local">
+
+      <label for="typeSelect">Tipo</label>
+      <select id="typeSelect">
+        <option value="origem">Origem</option>
+        <option value="destino">Destino</option>
+        <option value="referencia">Referência</option>
+      </select>
+
+      <div class="coordinates">
+        <span>X: <b id="xValue">—</b></span>
+        <span>Y: <b id="yValue">—</b></span>
+      </div>
+
+      <div class="editor-actions">
+        <button id="applyBtn" type="button">Aplicar alterações</button>
+        <button id="deleteLocalBtn" class="danger" type="button">Excluir local</button>
+      </div>
+    </section>
+
+    <section id="pointTools" class="tool-section hidden">
+      <p class="help"><b>Pontos de passagem</b> formam a rede dos corredores. Arraste os existentes ou clique em um espaço vazio para criar outro.</p>
+
+      <button id="addPointBtn" class="primary full" type="button">+ Novo ponto de passagem</button>
+
+      <div class="coordinates">
+        <span>ID: <b id="pointIdValue">—</b></span>
+        <span>X: <b id="pointXValue">—</b></span>
+        <span>Y: <b id="pointYValue">—</b></span>
+      </div>
+
+      <button id="deletePointBtn" class="danger full" type="button">Excluir ponto selecionado</button>
+    </section>
+
+    <section id="connectionTools" class="tool-section hidden">
+      <p class="help"><b>Conexões</b> definem por onde a rota pode passar. Clique em dois pontos de passagem para ligar os dois.</p>
+
+      <div class="connection-info">
+        <div>Primeiro ponto: <b id="connectionStartValue">—</b></div>
+        <div>Conexão selecionada: <b id="connectionSelectedValue">—</b></div>
+      </div>
+
+      <button id="removeConnectionBtn" class="danger full" type="button">Remover conexão selecionada</button>
+      <button id="cancelConnectionBtn" type="button" class="full">Cancelar seleção</button>
+    </section>
+
+    <hr>
+
+    <h3>Arquivo</h3>
+    <p class="help">Salve no navegador para usar as alterações no Campus Guia. Exporte uma cópia para guardar ou transferir.</p>
+
+    <div class="editor-actions">
+      <button id="saveBtn" class="primary" type="button">💾 Salvar mapa</button>
+      <button id="exportBtn" type="button">⬇ Exportar JSON</button>
+      <label class="file-button" for="importInput">⬆ Importar JSON</label>
+      <input id="importInput" type="file" accept="application/json" hidden>
+    </div>
+
+    <button id="resetBtn" class="full reset-button" type="button">↺ Recarregar dados originais</button>
+
+    <div id="editorStatus" class="editor-status">Pronto para editar.</div>
+  </aside>
+
+  <section class="card editor-map-card">
+    <div class="mapHead">
+      <div>
+        <span id="modeLabel">Modo: Local</span>
+        <h2>🗺️ Planta do Campus 1</h2>
+      </div>
+      <div class="map-counter">
+        <span><b id="pointCount">0</b> pontos</span>
+        <span><b id="connectionCount">0</b> conexões</span>
+      </div>
+    </div>
+
+    <div class="editor-map-wrap">
+      <svg id="editorMap" viewBox="0 0 4033.94 1846.6" role="img" aria-label="Editor do mapa do Campus 1">
+        <image href="campus1.svg" x="0" y="0" width="4033.94" height="1846.6" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></image>
+        <g id="editorSegments"></g>
+        <g id="editorNodes"></g>
+      </svg>
+    </div>
+
+    <div class="editor-legend">
+      <span><i class="legend-point"></i> Ponto de passagem</span>
+      <span><i class="legend-local"></i> Local</span>
+      <span><i class="legend-line"></i> Conexão / corredor</span>
+    </div>
+  </section>
+</main>
+
+<script src="js/dados.js?v=editor2"></script>
+<script src="js/mapa.js?v=editor2"></script>
+<script src="js/editorMapa.js?v=editor2"></script>
+</body>
+</html>

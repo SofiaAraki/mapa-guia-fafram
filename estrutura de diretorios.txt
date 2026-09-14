@@ -1,25 +1,49 @@
-campus-guia/
-│
+CAMPUS GUIA — ESTRUTURA
+
+/
 ├── index.html
-│
+├── editor.html
+├── campus1.svg
+├── campus-guia-mapa.json
 ├── css/
-│   └── style.css
-│
+│   ├── style.css
+│   └── editor.css
 ├── js/
-│   ├── app.js
+│   ├── dados.js
 │   ├── mapa.js
 │   ├── rotas.js
+│   ├── app.js
+│   ├── editorMapa.js
 │   ├── personagem.js
-│   └── acessibilidade.js
-│
-├── mapa/
-│   └── campus.svg
-│
-├── personagens/
-│   ├── personagem1.png
-│   ├── personagem2.png
-│   └── robo.png
-│
-└── dados/
-    ├── locais.json
-    └── caminhos.json
+│   ├── segmentos_detectados.js
+│   └── validate-map.js
+└── README.md
+
+RESPONSABILIDADES
+
+dados.js
+    Dados editáveis: locais, categorias, pontos de passagem e conexões.
+
+mapa.js
+    Motor do mapa, liga os locais à rede e produz os segmentos usados pela aplicação.
+
+rotas.js
+    Calcula a menor rota usando o grafo.
+
+app.js
+    Interface principal e animação da rota.
+
+editorMapa.js
+    Editor visual de locais, pontos de passagem e conexões.
+
+editor.html
+    Painel administrativo local para editar a planta.
+
+campus1.svg
+    Planta visual de referência.
+
+campus-guia-mapa.json
+    Cópia exportável da configuração do mapa.
+
+validate-map.js
+    Verifica coordenadas, conexões e alcançabilidade das rotas.

@@ -266,3 +266,5 @@ body.large-text .room-label.small{font-size:13px}
   main{width:min(100% - 20px,1100px)}
   .card{padding:16px}
 }
+
+.editor-link{color:var(--blue);font-weight:bold;text-decoration:none;white-space:nowrap}

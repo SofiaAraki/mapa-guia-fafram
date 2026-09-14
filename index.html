@@ -15,6 +15,8 @@
     <p>Encontre seu destino no mapa do Campus 1 de forma simples e interativa.</p>
   </div>
 
+  <a class="editor-link" href="editor.html">⚙ Editor</a>
+
   <button id="accessibilityBtn"
           class="accessibility-btn"
           title="Opções de acessibilidade"
@@ -52,7 +54,7 @@
 
     <div class="mapWrap">
       <svg id="campusMap"
-           viewBox="0 0 4033.94 1976.96"
+           viewBox="0 0 4033.94 1846.6"
            aria-label="Mapa oficial interativo do Campus 1 da FAFRAM"
            role="img">
         <title>Mapa FAFRAM Campos 1</title>
@@ -63,13 +65,9 @@
                x="0"
                y="0"
                width="4033.94"
-               height="1976.96"
+               height="1846.6"
                preserveAspectRatio="xMidYMid meet"
                aria-hidden="true" />
-
-        <foreignObject x="0" y="0" width="1" height="1" aria-hidden="true">
-          <object id="campusGeometry" data="campus1.svg" type="image/svg+xml" width="1" height="1"></object>
-        </foreignObject>
 
         <g id="mapAreas" aria-hidden="true"></g>
         <g id="baseWalkways" aria-hidden="true"></g>
@@ -102,9 +100,10 @@
 
 <footer>Campus Guia FAFRAM — Campus 1</footer>
 
-<script src="js/dados.js?v=svg9"></script>
-<script src="js/rotas.js?v=svg9"></script>
-<script src="js/personagem.js?v=svg9"></script>
-<script src="js/app.js?v=svg9"></script>
+<script src="js/dados.js?v=refactor1"></script>
+<script src="js/mapa.js?v=refactor1"></script>
+<script src="js/rotas.js?v=refactor1"></script>
+<script src="js/personagem.js?v=refactor1"></script>
+<script src="js/app.js?v=refactor1"></script>
 </body>
 </html>
